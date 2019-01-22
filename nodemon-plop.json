@@ -1,0 +1,13 @@
+{
+    "verbose": true,
+    "env": {
+      "DEBUG": "fsm:*"
+    },
+    "watch": [
+      "fsm.js",
+      "plop/**/*"
+    ],
+    "execMap": {
+      "fsm.js": "plop"
+    }
+  }

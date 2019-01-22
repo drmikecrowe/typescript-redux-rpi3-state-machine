@@ -1,0 +1,85 @@
+{
+  "name": "typescript-redux-rpi3-state-machine",
+  "version": "0.0.1",
+  "description": "Very Important Personal Streamer",
+  "main": "dist/index.js",
+  "repository": {
+    "url": "https://github.com/drmikecrowe/typescript-redux-rpi3-state-machine.git",
+    "type": ""
+  },
+  "scripts": {
+    "build:prod": "webpack --config webpack.config.prod.js",
+    "build:dev": "webpack --config webpack.config.js",
+    "plop": "plop",
+    "test:debug": "node --inspect node_modules/.bin/jest --runInBand",
+    "test": "jest",
+    "watch:webpack": "DEBUG=fsm:* webpack-watch-server --stdin --config webpack.config.js",
+    "watch:app": "nodemon --no-stdin --config nodemon-ts.json",
+    "watch:plop": "nodemon --exec plop fsm.js"
+  },
+  "author": "Mike Crowe",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/strongloop/loopback-swagger/issues"
+  },
+  "devDependencies": {
+    "@types/aws-iot-device-sdk": "",
+    "@types/jest": "",
+    "@types/lodash": "",
+    "@types/node": "",
+    "@types/redux-saga-tester": "^1.0.1",
+    "@types/rpio": "0.0.2",
+    "fs-jetpack": "",
+    "handlebars": "^4.0.12",
+    "jest": "",
+    "jest-cli": "^23.6.0",
+    "nodemon": "^1.18.9",
+    "plop": "^2.2.0",
+    "ts-jest": "",
+    "ts-loader": "",
+    "ts-node": "^7.0.1",
+    "tsconfig-paths": "^3.7.0",
+    "tsconfig-paths-webpack-plugin": "^3.2.0",
+    "tslint": "",
+    "typescript": "",
+    "uglifyjs-webpack-plugin": "",
+    "viz.js": "^2.1.2",
+    "webpack": "",
+    "webpack-cli": "^3.2.1",
+    "webpack-watch-server": ""
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "test\\.tsx?$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json",
+      "node"
+    ]
+  },
+  "dependencies": {
+    "@taoqf/javascript-state-machine": "github:drmikecrowe/javascript-state-machine",
+    "aws-iot-device-sdk": "",
+    "axios": "",
+    "debug": "",
+    "immutability-helper": "",
+    "isomorphic-fetch": "",
+    "keyboard-js": "",
+    "keypress": "^0.2.1",
+    "lodash": "",
+    "node-cleanup": "^2.1.2",
+    "redux": "",
+    "redux-saga": "",
+    "redux-saga-tester": "^1.0.381",
+    "rpio": "",
+    "rpio2": "",
+    "rxjs": "",
+    "uglifyjs-webpack-plugin": "^1.3.0",
+    "winston": "^3.1.0"
+  }
+}

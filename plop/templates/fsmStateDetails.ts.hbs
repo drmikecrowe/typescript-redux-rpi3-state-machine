@@ -1,0 +1,65 @@
+const debug_reducer = require('debug')('fsm:reducer:{{stateName}}');
+const debug_saga = require('debug')('fsm:saga:{{stateName}}');
+
+import update from "immutability-helper";
+import { Action } from "redux";
+import {call, put, select, takeEvery} from 'redux-saga/effects';
+import { {{beforeStateNameCaps}}, {{stateNameCaps}}, {{leaveStateNameCaps}} } from "../fsmDefinitions";
+import { FsmState } from "../index";
+import * as StateMachine from '@taoqf/javascript-state-machine';
+
+
+// ***************** [ States ] ***************** //
+export interface {{stateName}}State {
+}
+
+export let initial{{stateName}}State: {{stateName}}State = {
+};
+
+// ***************** [ Sagas ] ***************** //
+export function* {{beforeStateName}}Saga() {
+    yield takeEvery({{beforeStateNameCaps}}, function* () {
+        debug_saga(`{{beforeStateName}}Sagas: {{beforeStateNameCaps}}`);
+    });
+}
+export function* {{stateName}}Saga() {
+    yield takeEvery({{stateNameCaps}}, function* () {
+        debug_saga(`{{stateName}}Sagas: {{stateNameCaps}}`);
+    });
+}
+export function* {{leaveStateName}}Saga() {
+    yield takeEvery({{leaveStateNameCaps}}, function* () {
+        debug_saga(`{{leaveStateName}}Sagas: {{leaveStateNameCaps}}`);
+    });
+}
+
+export const {{stateName}}Sagas: Function[] = [
+    {{beforeStateName}}Saga, 
+    {{stateName}}Saga,  
+    {{leaveStateName}}Saga
+];
+
+// ***************** [ Reducer ] ***************** //
+
+export let fsm{{stateName}}Reducer = (state = initial{{stateName}}State, { type }: Action): {{stateName}}State => {
+    switch (type) {
+        case {{stateNameCaps}}:
+            debug_reducer(type);
+            // ### stateNameCaps-reducer-start
+            // ### stateNameCaps-reducer-end
+            return state;
+        default:
+            return state;
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
