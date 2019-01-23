@@ -11,7 +11,7 @@ import * as StateMachine from "@taoqf/javascript-state-machine";
 import * as _ from "lodash";
 import { Action } from "redux";
 import { all, call, put, spawn, fork, select, take, takeEvery, takeLatest } from "redux-saga/effects";
-import { delay, END, eventChannel } from "redux-saga";
+import { END, eventChannel } from "redux-saga";
 import { FsmState, initialFsmState } from "./index";
 import { PayloadAction } from "@src/store";
 
@@ -106,7 +106,7 @@ function getTransNames(o) {
     return data;
 }
 
-export const fsmOptions: StateMachine.Options = {
+export const fsmOptions: Partial<StateMachine.Options> = {
     init: CLOSED_STATE,
     transitions: [
         { name: FIRE_DO_OPEN,                               from: CLOSED_STATE,                     to: OPENED_STATE,                        },
