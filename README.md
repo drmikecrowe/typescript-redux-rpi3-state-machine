@@ -23,7 +23,7 @@ When run (either via local execution or remotely on the Raspberry PI via ssh),
 
 Auto-generated from [this definition file](../blob/master/fsm.js)
 
-![Example State Machine](https://github.com/drmikecrowe/typescript-redux-rpi3-state-machine/raw/master/documentation/fsm.svg "Example State Machine")
+![Example State Machine](./documentation/fsm.svg)
 
 ## Usage
 
