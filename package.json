@@ -10,7 +10,7 @@
   "scripts": {
     "build:prod": "webpack --config webpack.config.prod.js",
     "build:dev": "webpack --config webpack.config.js",
-    "plop": "plop",
+    "plop": "plop --plopfile ./generators/plopfile.js",
     "test:debug": "node --inspect node_modules/.bin/jest --runInBand",
     "test": "jest",
     "watch:webpack": "DEBUG=fsm:* webpack-watch-server --stdin --config webpack.config.js",

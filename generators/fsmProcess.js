@@ -129,5 +129,5 @@ const proc = () => {
 module.exports = proc;
 
 proc().then(ret=>{
-    console.log(JSON.stringify(ret, null, 4))
+    console.log('done');
 });
