@@ -59,3 +59,7 @@ typings/
 
 #dist
 dist
+
+src/**/*.js 
+src/**/*.js.map
+
