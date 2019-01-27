@@ -1,19 +1,16 @@
-// prettier-ignore
-const debug = require("debug")("fsm:" + __filename.replace(/^.*(src)/, "$1").replace(/.[jt]s}/, "").replace(/\//g, ":"));
-
-import { isWin, PayloadAction } from "../..";
-
-if (isWin) {
-    require("./platform/desktop");
-} else {
-    require("./platform/rpi");
-}
+import { IPayloadAction } from '@src/store';
+import { HardwareFactory, IHardwareInterface } from '@src/store/app/hardware';
 
 export * from "./hardwareSagas";
+export * from "./hardwareInterface";
 
-export interface HardwareState {}
+export interface IHardwareState {
+    hardware: IHardwareInterface
+}
 
-export let initialHardwareState: HardwareState = {};
+export let initialHardwareState: IHardwareState = {
+    hardware: HardwareFactory.getInstance()
+};
 
 export const OPEN_DOOR = "OPEN_DOOR";
 export let openDoor = () => ({ type: OPEN_DOOR });
@@ -21,9 +18,13 @@ export let openDoor = () => ({ type: OPEN_DOOR });
 export const CLOSE_DOOR = "CLOSE_DOOR";
 export let closeDoor = () => ({ type: CLOSE_DOOR });
 
-export let hardwareReducer = (state = initialHardwareState, { type, payload }: PayloadAction<any>): HardwareState => {
+export let hardwareReducer = (state = initialHardwareState, { type, payload }: IPayloadAction<any>): IHardwareState => {
     switch (type) {
         default:
             return state;
     }
 };
+
+export function getHardwareState(state: any): IHardwareState {
+    return state.app.hardware;
+}

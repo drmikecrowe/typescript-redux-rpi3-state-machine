@@ -1,31 +1,21 @@
-// prettier-ignore
-const debug = require("debug")("fsm:" + __filename.replace(/^.*(src)/, "$1").replace(/.[jt]s}/, "").replace(/\//g, ":"));
+import debug from "debug";
+const dbg: debug.Debugger = debug("vips:store:index");
 
-export const isWin = process.platform === "win32" || process.platform === "linux";
+export const isWin = ((process.platform === "win32") || (process.platform === "linux"));
 
-import { Action, applyMiddleware, combineReducers, createStore, Store } from "redux";
-import { cancel, fork, join, race, take } from "redux-saga/effects";
-import { appReducer, appSagas, AppState } from "./app";
-import createSagaMiddleware, { SagaMiddleware } from "redux-saga";
+import {Action, applyMiddleware, combineReducers, createStore, Store} from 'redux';
+import {cancel, fork, join, race, take} from 'redux-saga/effects';
+import {appReducer, appSagas, IAppState} from '@src/store/app';
+import createSagaMiddleware, {SagaMiddleware} from 'redux-saga';
 
-export * from "./app";
-export * from "./constants";
+export * from './app';
+export * from './constants';
 
-export { Log } from "../logger";
-
-export interface PayloadAction<T> extends Action {
+export interface IPayloadAction<T> extends Action {
     payload: T;
 }
 
-export interface State {
-    app: AppState;
-}
-
-export let reducers = combineReducers<State | undefined>({
-    app: appReducer,
-});
-
-export let loadSagas = (sagas: SagaMiddleware<object>, newSagas: any[]) => {
+export let loadSagas = (sagaList: SagaMiddleware<object>, newSagas: any[]) => {
     newSagas
         .map(
             saga =>
@@ -33,23 +23,23 @@ export let loadSagas = (sagas: SagaMiddleware<object>, newSagas: any[]) => {
                     const task = yield fork(saga);
 
                     const { done, canceled } = yield race({
-                        done: join(task),
                         canceled: take("CANCEL_SAGAS"),
+                        done: join(task),
                     });
 
-                    if (canceled) yield cancel(task);
+                    if (canceled) { yield cancel(task); }
                 },
         )
-        .forEach(saga => sagas.run(saga));
+        .forEach(saga => sagaList.run(saga));
 };
 
-export let cancelSagas = (store: Store<State>) => store.dispatch({ type: "CANCEL_SAGAS" });
+export let cancelSagas = (s: Store<IAppState>) => s.dispatch({ type: "CANCEL_SAGAS" });
 
 export const sagas = createSagaMiddleware();
 
-const configureStore = (initialState?: State): Store<State | undefined> => {
+const configureStore = (initialState?: IAppState): Store<IAppState | undefined> => {
     const middlewares: any[] = [sagas];
-    return createStore(reducers, initialState, applyMiddleware(...middlewares));
+    return createStore(appReducer, initialState, applyMiddleware(...middlewares));
 };
 
 const store = configureStore();

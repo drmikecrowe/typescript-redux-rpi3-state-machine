@@ -2,7 +2,7 @@ const _ = require("lodash");
 const fs = require("fs");
 const path = require("path");
 const fd = require("../fsm");
-const debug = require("debug")("plop");
+const dbg = require("debug")("plop");
 const handlebars = require("handlebars");
 
 const StateMachine = require("@taoqf/javascript-state-machine/dist/state-machine");
@@ -13,10 +13,12 @@ const { Module, render } = require("viz.js/full.render.js");
 const transitions_list = fd.transitions;
 const transitions = _.uniq(_.map(transitions_list, "name"));
 const states = _.uniq(_.concat(_.map(transitions_list, "from"), _.map(transitions_list, "to")));
+const defaultState = states[0].toUpperCase() + "_STATE";
+
 
 function fsmSvg() {
     const log = function(msg, separate) {
-        debug(msg);
+        dbg(msg);
     };
 
     const fsm = new StateMachine({
@@ -25,23 +27,23 @@ function fsmSvg() {
         statedefs: fd.statedefs,
         methods: {
             onBeforeTransition: function(lifecycle) {
-                log("BEFORE: " + lifecycle.transition, true);
+                  dbg("BEFORE: " + lifecycle.transition, true);
             },
 
             onLeaveState: function(lifecycle) {
-                log("LEAVE: " + lifecycle.from);
+                  dbg("LEAVE: " + lifecycle.from);
             },
 
             onEnterState: function(lifecycle) {
-                log("ENTER: " + lifecycle.to);
+                  dbg("ENTER: " + lifecycle.to);
             },
 
             onAfterTransition: function(lifecycle) {
-                log("AFTER: " + lifecycle.transition);
+                  dbg("AFTER: " + lifecycle.transition);
             },
 
             onTransition: function(lifecycle) {
-                log("DURING: " + lifecycle.transition + " (from " + lifecycle.from + " to " + lifecycle.to + ")");
+                  dbg("DURING: " + lifecycle.transition + " (from " + lifecycle.from + " to " + lifecycle.to + ")");
             }
         }
     });
@@ -55,26 +57,27 @@ function fsmSvg() {
 }
 
 function getStateNames(o) {
-    let data = {
-    };
+    let data = {};
     data.stateName = o + "State";
-    data.beforeStateName = "onBefore" + _.upperFirst(data.stateName)
-    data.leaveStateName = "onLeave" + _.upperFirst(data.stateName);
     data.stateNameCaps = _.snakeCase(data.stateName).toUpperCase();
+    data.beforeStateName = "onBefore" + _.upperFirst(data.stateName)
     data.beforeStateNameCaps = _.snakeCase(data.beforeStateName).toUpperCase();
+    data.leaveStateName = "onLeave" + _.upperFirst(data.stateName);
     data.leaveStateNameCaps = _.snakeCase(data.leaveStateName).toUpperCase();
     return data;
 }
 
 function getTransNames(o) {
     let data = {};
-    data.transName = "fire" + _.upperFirst(o);
-    data.beforeTransName = "onBefore" + _.upperFirst(data.transName);
-    data.canTransName = "can" + _.upperFirst(data.transName);
-    data.errorTransName = "error" + _.upperFirst(data.transName);
-    data.transNameCaps = _.snakeCase(data.transName).toUpperCase();
-    data.beforeTransNameCaps = _.snakeCase(data.beforeTransName).toUpperCase();
+    data.canTransName = "can" + _.upperFirst(o);
     data.canTransNameCaps = _.snakeCase(data.canTransName).toUpperCase();
+    data.enterTransName = "enter" + _.upperFirst(o);
+    data.enterTransNameCaps = _.snakeCase(data.enterTransName).toUpperCase();
+    data.fireTransName = "fire" + _.upperFirst(o);
+    data.fireTransNameCaps = _.snakeCase(data.fireTransName).toUpperCase();
+    data.beforeTransName = "onBefore" + _.upperFirst(data.fireTransName);
+    data.beforeTransNameCaps = _.snakeCase(data.beforeTransName).toUpperCase();
+    data.errorTransName = "error" + _.upperFirst(data.fireTransName);
     data.errorTransNameCaps = _.snakeCase(data.errorTransName).toUpperCase();
     return data;
 }
@@ -83,7 +86,7 @@ function getTransDetails() {
     let info = [];
     _.each(transitions_list, o => {
         let data     = {};
-        data.name = _.padEnd(`name: ${getTransNames(o.name).transNameCaps},`, 50);
+        data.name = _.padEnd(`name: ${getTransNames(o.name).canTransNameCaps},`, 50);
         data.from = _.padEnd(`from: ${getStateNames(o.from).stateNameCaps},`, 40);
         data.to =  _.padEnd(`to: ${getStateNames(o.to).stateNameCaps},`, 40);
         info.push(data);
@@ -111,6 +114,7 @@ const proc = () => {
     return new Promise((resolve, reject) => {
         (async () => {
             let ret = {
+                defaultState,
                 transitions: fsmTransDefs(),
                 states: fsmStateDefs(),
                 transitions_list: getTransDetails(),

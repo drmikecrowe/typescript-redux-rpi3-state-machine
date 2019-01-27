@@ -34,6 +34,12 @@ module.exports = function (plop) {
             path: __dirname + '/../src/store/app/fsm/fsmDefinitions.ts',
         },
         {
+            type: 'add',
+            data: fsm,
+            templateFile: __dirname + '/templates/fsmStateTester.test.ts.hbs',
+            path: __dirname + '/../src/store/app/fsm/states/test/StateTester.test.ts',
+        },
+        {
             type: 'writeStates',
             data: fsm,
         },

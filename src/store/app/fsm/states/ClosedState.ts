@@ -1,39 +1,56 @@
-const debug_reducer = require('debug')('fsm:reducer:ClosedState');
-const debug_saga = require('debug')('fsm:saga:ClosedState');
+import debug from "debug";
+const dbg: debug.Debugger = debug("fsm:states:ClosedState");
 
 import update from "immutability-helper";
 import { Action } from "redux";
-import {call, put, select, takeEvery} from 'redux-saga/effects';
-import { ON_BEFORE_CLOSED_STATE, CLOSED_STATE, ON_LEAVE_CLOSED_STATE } from "../fsmDefinitions";
-import { FsmState } from "../index";
-import * as StateMachine from '@taoqf/javascript-state-machine';
+import { delay, race, select, take, takeEvery } from "redux-saga/effects";
+import { CLOSED_STATE, ON_BEFORE_CLOSED_STATE, ON_LEAVE_CLOSED_STATE, CANCEL_TRANSITION } from "../fsmDefinitions";
+import { IFsmState, getFsmStateMachine } from "../index";
 
 
 // ***************** [ States ] ***************** //
-export interface ClosedStateState {
-}
+export interface IClosedState {}
 
-export let initialClosedStateState: ClosedStateState = {
-};
+export let initialClosedState: IClosedState = {};
 
 // ***************** [ Sagas ] ***************** //
 export function* onBeforeClosedStateSaga() {
+    const fsm: StateMachine = yield select(getFsmStateMachine);
     yield takeEvery(ON_BEFORE_CLOSED_STATE, function* () {
-        debug_saga(`onBeforeClosedStateSagas: ON_BEFORE_CLOSED_STATE`);
+        dbg(`onBeforeClosedStateSagas: ON_BEFORE_CLOSED_STATE`);
+        const { wait, undo } = yield race({
+            undo: take(CANCEL_TRANSITION),
+            wait: delay(1),
+        });
+        const f: any = fsm._fsm;
+        if (!!undo) {
+            f[`${f[`CURRENT_TRANSITION`]}_CANCEL`] = true;
+            dbg(`Cancelling CLOSED_STATE`);
+        }
     });
 }
 export function* ClosedStateSaga() {
     yield takeEvery(CLOSED_STATE, function* () {
-        debug_saga(`ClosedStateSagas: CLOSED_STATE`);
+        dbg(`ClosedStateSagas: CLOSED_STATE`);
     });
 }
 export function* onLeaveClosedStateSaga() {
+    const fsm: StateMachine = yield select(getFsmStateMachine);
     yield takeEvery(ON_LEAVE_CLOSED_STATE, function* () {
-        debug_saga(`onLeaveClosedStateSagas: ON_LEAVE_CLOSED_STATE`);
+        dbg(`onLeaveClosedStateSagas: ON_LEAVE_CLOSED_STATE`);
+        const { wait, undo } = yield race({
+            undo: take(CANCEL_TRANSITION),
+            wait: delay(1),
+        });
+        const f: any = fsm._fsm;
+        if (!!undo) {
+            f[`${f[`CURRENT_TRANSITION`]}_CANCEL`] = true;
+            dbg(`Cancelling CLOSED_STATE`);
+        }
     });
 }
 
-export const ClosedStateSagas: Function[] = [
+export const ClosedStateSagas: Array<() => void> = [
     onBeforeClosedStateSaga, 
     ClosedStateSaga,  
     onLeaveClosedStateSaga
@@ -41,12 +58,11 @@ export const ClosedStateSagas: Function[] = [
 
 // ***************** [ Reducer ] ***************** //
 
-export let fsmClosedStateReducer = (state = initialClosedStateState, { type }: Action): ClosedStateState => {
+export let fsmClosedStateReducer = (state = initialClosedState, { type }: Action): IClosedState => {
+    // dbg(`fsmClosedStateReducer: ${type}`);
     switch (type) {
         case CLOSED_STATE:
-            debug_reducer(type);
-            // ### stateNameCaps-reducer-start
-            // ### stateNameCaps-reducer-end
+            dbg(`fsmClosedStateReducer: ${type}`);
             return state;
         default:
             return state;

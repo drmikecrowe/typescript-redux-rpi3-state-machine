@@ -1,44 +1,41 @@
-const winston = require("winston");
 import * as path from "path";
 import * as fs from "fs";
 import * as _ from "lodash";
 
-let isWin = process.platform === "win32" || process.platform === "linux";
-let debug = true; //(process.env.DEBUG > '');
+import { createLogger, format, transports, Logger } from "winston";
 
-let t = [];
-if (debug) {
-    t.push(
-        new winston.transports.Console({
-            prettyPrint: true,
-            json: false,
-            level: "debug",
-            colorize: true
-        })
-    );
-}
-if (isWin) {
-    let cwd = process.cwd();
-    let logs = path.join(cwd, "logs");
-    if (!fs.existsSync(logs)) {
-        fs.mkdirSync(logs);
+import { isWin } from "./store";
+
+export class LoggerFactory {
+    private static instance: Logger;
+    static getInstance() {
+        if (!LoggerFactory.instance) {
+            const env = process.env.NODE_ENV || "development";
+            const cwd = process.cwd();
+            const logs = path.join(cwd, "logs");
+            if (!fs.existsSync(logs)) {
+                fs.mkdirSync(logs);
+            }
+            const log_file = path.join(logs, "simulator.log");
+            const level = env === "development" ? "debug" : "info";
+
+            LoggerFactory.instance = createLogger({
+                level: level,
+                format: format.combine(
+                    format.timestamp({
+                        format: "YYYY-MM-DD HH:mm:ss",
+                    }),
+                    format.json(),
+                ),
+                transports: [
+                    new transports.Console({
+                        level: "info",
+                        format: format.combine(format.colorize(), format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)),
+                    }),
+                    new transports.File({ filename: log_file }),
+                ],
+            });
+        }
+        return LoggerFactory.instance;
     }
-    let log_file = path.join(logs, "simulator.log");
-    t.push(
-        new winston.transports.File({
-            filename: log_file,
-            prettyPrint: true,
-            level: debug ? "debug" : "info",
-            json: false,
-            tailable: true,
-            maxsize: "1M",
-            maxFiles: 5,
-            timestamp: true
-        })
-    );
 }
-
-export const Log = winston.createLogger({
-    level: debug ? "debug" : "info",
-    transports: t
-});

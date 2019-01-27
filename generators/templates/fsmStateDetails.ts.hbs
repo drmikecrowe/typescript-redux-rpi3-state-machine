@@ -1,39 +1,56 @@
-const debug_reducer = require('debug')('fsm:reducer:{{stateName}}');
-const debug_saga = require('debug')('fsm:saga:{{stateName}}');
+import debug from "debug";
+const dbg: debug.Debugger = debug("fsm:states:{{stateName}}");
 
 import update from "immutability-helper";
 import { Action } from "redux";
-import {call, put, select, takeEvery} from 'redux-saga/effects';
-import { {{beforeStateNameCaps}}, {{stateNameCaps}}, {{leaveStateNameCaps}} } from "../fsmDefinitions";
-import { FsmState } from "../index";
-import * as StateMachine from '@taoqf/javascript-state-machine';
+import { delay, race, select, take, takeEvery } from "redux-saga/effects";
+import { {{stateNameCaps}}, {{beforeStateNameCaps}}, {{leaveStateNameCaps}}, CANCEL_TRANSITION } from "../fsmDefinitions";
+import { IFsmState, getFsmStateMachine } from "../index";
 
 
 // ***************** [ States ] ***************** //
-export interface {{stateName}}State {
-}
+export interface I{{stateName}} {}
 
-export let initial{{stateName}}State: {{stateName}}State = {
-};
+export let initial{{stateName}}: I{{stateName}} = {};
 
 // ***************** [ Sagas ] ***************** //
 export function* {{beforeStateName}}Saga() {
+    const fsm: StateMachine = yield select(getFsmStateMachine);
     yield takeEvery({{beforeStateNameCaps}}, function* () {
-        debug_saga(`{{beforeStateName}}Sagas: {{beforeStateNameCaps}}`);
+        dbg(`{{beforeStateName}}Sagas: {{beforeStateNameCaps}}`);
+        const { wait, undo } = yield race({
+            undo: take(CANCEL_TRANSITION),
+            wait: delay(1),
+        });
+        const f: any = fsm._fsm;
+        if (!!undo) {
+            f[`${f[`CURRENT_TRANSITION`]}_CANCEL`] = true;
+            dbg(`Cancelling {{stateNameCaps}}`);
+        }
     });
 }
 export function* {{stateName}}Saga() {
     yield takeEvery({{stateNameCaps}}, function* () {
-        debug_saga(`{{stateName}}Sagas: {{stateNameCaps}}`);
+        dbg(`{{stateName}}Sagas: {{stateNameCaps}}`);
     });
 }
 export function* {{leaveStateName}}Saga() {
+    const fsm: StateMachine = yield select(getFsmStateMachine);
     yield takeEvery({{leaveStateNameCaps}}, function* () {
-        debug_saga(`{{leaveStateName}}Sagas: {{leaveStateNameCaps}}`);
+        dbg(`{{leaveStateName}}Sagas: {{leaveStateNameCaps}}`);
+        const { wait, undo } = yield race({
+            undo: take(CANCEL_TRANSITION),
+            wait: delay(1),
+        });
+        const f: any = fsm._fsm;
+        if (!!undo) {
+            f[`${f[`CURRENT_TRANSITION`]}_CANCEL`] = true;
+            dbg(`Cancelling {{stateNameCaps}}`);
+        }
     });
 }
 
-export const {{stateName}}Sagas: Function[] = [
+export const {{stateName}}Sagas: Array<() => void> = [
     {{beforeStateName}}Saga, 
     {{stateName}}Saga,  
     {{leaveStateName}}Saga
@@ -41,12 +58,11 @@ export const {{stateName}}Sagas: Function[] = [
 
 // ***************** [ Reducer ] ***************** //
 
-export let fsm{{stateName}}Reducer = (state = initial{{stateName}}State, { type }: Action): {{stateName}}State => {
+export let fsm{{stateName}}Reducer = (state = initial{{stateName}}, { type }: Action): I{{stateName}} => {
+    // dbg(`fsm{{stateName}}Reducer: ${type}`);
     switch (type) {
         case {{stateNameCaps}}:
-            debug_reducer(type);
-            // ### stateNameCaps-reducer-start
-            // ### stateNameCaps-reducer-end
+            dbg(`fsm{{stateName}}Reducer: ${type}`);
             return state;
         default:
             return state;
